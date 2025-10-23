@@ -121,11 +121,7 @@ export class PlayApp extends App {
             return
         }
 
-        // Handle the API response structure: { success: true, data: { players }, meta: {...} }
-        const players = data?.data?.players || []
-        console.log('players', players)
-        
-        for (const player of players) {
+        for (const player of data.players) {
             if (player.uid === this.uid) continue
             this.updatePlayer(player.uid, player)
         }

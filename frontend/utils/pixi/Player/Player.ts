@@ -6,14 +6,7 @@ import { bfs } from '../pathfinding'
 import { server } from '../../backend/server'
 import { defaultSkin, skins } from './skins'
 import signal from '@/utils/signal'
-
-// Dynamic import for videoChat to avoid SSR issues
-let videoChat: any = null
-if (typeof window !== 'undefined') {
-    import('@/utils/video-chat/video-chat').then(module => {
-        videoChat = module.videoChat
-    })
-}
+import { videoChat } from '@/utils/video-chat/video-chat'
 function formatText(message: string, maxLength: number): string {
     message = message.trim()
     const words = message.split(' ')
@@ -94,9 +87,9 @@ export class Player {
         animatedSprite.animationSpeed = this.animationSpeed
         animatedSprite.play()
 
-        // Always add the sprite to the parent container
-        this.parent.addChild(animatedSprite)
-        console.log('Added animated sprite to parent container for player:', this.username)
+        if (!this.initialized) {
+            this.parent.addChild(animatedSprite)
+        }
     }
 
     public changeSkin = async (skin: string) => {
@@ -109,7 +102,6 @@ export class Player {
     }
 
     private addUsername() {
-        console.log('Adding username for player:', this.username)
         const text = new PIXI.Text({
             text: this.username,
             style: {
@@ -122,7 +114,6 @@ export class Player {
         text.scale.set(0.07)
         text.y = 8
         this.parent.addChild(text)
-        console.log('Username added to parent container for player:', this.username)
     }
 
     public setMessage(message: string) {
@@ -304,25 +295,19 @@ export class Player {
         if (tile && tile.privateAreaId) {
             if (tile.privateAreaId !== this.currentChannel) {
                 this.currentChannel = tile.privateAreaId
-                if (videoChat) {
-                    videoChat.joinChannel(tile.privateAreaId, this.playApp.uid + this.username, this.playApp.realmId)
-                }
+                videoChat.joinChannel(tile.privateAreaId, this.playApp.uid + this.username, this.playApp.realmId)
                 this.playApp.fadeInTiles(tile.privateAreaId)
             }
         } else {
             if (this.playApp.proximityId) {
                 if (this.playApp.proximityId !== this.currentChannel) {
                     this.currentChannel = this.playApp.proximityId
-                    if (videoChat) {
-                        videoChat.joinChannel(this.playApp.proximityId, this.playApp.uid + this.username, this.playApp.realmId)
-                    }
+                    videoChat.joinChannel(this.playApp.proximityId, this.playApp.uid + this.username, this.playApp.realmId)
                     this.playApp.fadeOutTiles()
                 }
             } else if (this.currentChannel !== 'local') {
                 this.currentChannel = 'local'
-                if (videoChat) {
-                    videoChat.leaveChannel()
-                }
+                videoChat.leaveChannel()
                 this.playApp.fadeOutTiles()
             }
         }

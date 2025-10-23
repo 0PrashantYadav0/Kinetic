@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import { TShirt } from '@phosphor-icons/react'
 import { useModal } from '../hooks/useModal'
@@ -10,13 +8,7 @@ import MicAndCameraButtons from '@/components/VideoChat/MicAndCameraButtons'
 import { useVideoChat } from '../hooks/useVideoChat'
 import AnimatedCharacter from './SkinMenu/AnimatedCharacter'
 import { useEffect } from 'react'
-// Dynamic import for videoChat to avoid SSR issues
-let videoChat: any = null
-if (typeof window !== 'undefined') {
-    import('@/utils/video-chat/video-chat').then(module => {
-        videoChat = module.videoChat
-    })
-}
+import { videoChat } from '@/utils/video-chat/video-chat'
 
 type PlayNavbarProps = {
     username: string

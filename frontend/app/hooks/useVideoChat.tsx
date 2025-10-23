@@ -1,25 +1,10 @@
-'use client'
-
 import React, { createContext, useContext, ReactNode, useEffect, useState, useMemo, useRef } from 'react'
+import AgoraRTC, { 
+    AgoraRTCProvider, 
+} from 'agora-rtc-react'
+import { IAgoraRTCRemoteUser } from 'agora-rtc-sdk-ng'
 import signal from '../../utils/signal'
-
-// Dynamic imports for AgoraRTC to avoid SSR issues
-let AgoraRTC: any = null
-let AgoraRTCProvider: any = null
-
-if (typeof window !== 'undefined') {
-    import('agora-rtc-react').then(module => {
-        AgoraRTC = module.default
-        AgoraRTCProvider = module.AgoraRTCProvider
-    })
-}
-// Dynamic import for videoChat to avoid SSR issues
-let videoChat: any = null
-if (typeof window !== 'undefined') {
-    import('../../utils/video-chat/video-chat').then(module => {
-        videoChat = module.videoChat
-    })
-}
+import { videoChat } from '../../utils/video-chat/video-chat'
 
 interface VideoChatContextType {
     toggleCamera: () => void
@@ -40,21 +25,11 @@ interface VideoChatProviderProps {
 }
 
 export const AgoraVideoChatProvider: React.FC<AgoraVideoChatProviderProps> = ({ children }) => {
-    const [isClient, setIsClient] = useState(false)
-    const [client, setClient] = useState<any>(null)
-
-    useEffect(() => {
-        setIsClient(true)
-        if (AgoraRTC) {
-            const newClient = AgoraRTC.createClient({ codec: "vp8", mode: "rtc" })
-            AgoraRTC.setLogLevel(4)
-            setClient(newClient)
-        }
+    const client = useMemo(() => {
+        const newClient = AgoraRTC.createClient({ codec: "vp8", mode: "rtc" })
+        AgoraRTC.setLogLevel(4)
+        return newClient
     }, [])
-
-    if (!isClient || !client || !AgoraRTCProvider) {
-        return <VideoChatProvider>{children}</VideoChatProvider>
-    }
 
     return (
         <AgoraRTCProvider client={client}>
@@ -71,24 +46,18 @@ const VideoChatProvider: React.FC<VideoChatProviderProps> = ({ children }) => {
 
     useEffect(() => {
         return () => {
-            if (videoChat) {
-                videoChat.destroy()
-            }
+            videoChat.destroy()
         }
     }, [])
 
     const toggleCamera = async () => {
-        if (videoChat) {
-            const muted = await videoChat.toggleCamera()
-            setIsCameraMuted(muted)
-        }
+        const muted = await videoChat.toggleCamera()
+        setIsCameraMuted(muted)
     }
 
     const toggleMicrophone = async () => {
-        if (videoChat) {
-            const muted = await videoChat.toggleMicrophone()
-            setIsMicMuted(muted)
-        }
+        const muted = await videoChat.toggleMicrophone()
+        setIsMicMuted(muted)
     }
 
     const value: VideoChatContextType = {

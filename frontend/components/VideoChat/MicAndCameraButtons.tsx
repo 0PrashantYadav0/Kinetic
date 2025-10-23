@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import { VideoCameraSlash, MicrophoneSlash, VideoCamera, Microphone } from '@phosphor-icons/react'
 import { useVideoChat } from '@/app/hooks/useVideoChat'
